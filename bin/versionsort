@@ -1,0 +1,32 @@
+#!/usr/bin/php
+<?php
+$list = [];
+while (!feof(STDIN)) {
+    $line = trim(fgets(STDIN));
+    if ($line !== '') {
+        $list[] = $line;
+    }
+}
+
+usort(
+    $list,
+    function ($lhs, $rhs) {
+        if ($lhs === 'master') {
+            return 1;
+        }
+        if ($rhs === 'master') {
+            return -1;
+        }
+        if (strpos($lhs, 'snapshot') !== false) {
+            $lhs = str_replace('snapshot', '.9999', $lhs);
+        }
+        if (strpos($rhs, 'snapshot') !== false) {
+            $rhs = str_replace('snapshot', '.9999', $rhs);
+        }
+        return version_compare($lhs, $rhs);
+    }
+);
+
+array_walk($list, function ($line) {
+    echo $line . "\n";
+});

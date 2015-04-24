@@ -1,0 +1,10 @@
+[Unit]
+Description=The wandbox frontend service
+After=network.service wandbox-cattleshed.service
+Requires=network.service wandbox-cattleshed.service
+
+[Service]
+ExecStart=/usr/bin/sudo -u wandbox /opt/wandbox/bin/kennel -c /opt/wandbox/etc/kennel.json
+
+[Install]
+WantedBy=multi-user.target
