@@ -3,7 +3,7 @@ Description=The wandbox backend service
 After=network.target
 
 [Service]
-ExecStart=/opt/wandbox/bin/cattleshed
+ExecStart=/usr/bin/sudo -u cattleshed /opt/wandbox/bin/cattleshed
 
 [Install]
 WantedBy=multi-user.target
