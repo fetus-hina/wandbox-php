@@ -1,0 +1,295 @@
+#!/usr/bin/env php
+<?php
+$switches = [
+    'codesnif-std-psr2' => [
+        'display-name' => 'PSR-2',
+        'flags' => [ '--standard=PSR2' ],
+        'display-flags' => '--standard=PSR2',
+        'conflicts' => [
+            'codesnif-std-psr1',
+            'codesnif-std-zend',
+            'codesnif-std-pear',
+            'codesnif-std-phpcs',
+            'codesnif-std-squiz',
+            'codesnif-std-mysource',
+        ],
+    ],
+    'codesnif-std-psr1' => [
+        'display-name' => 'PSR-1',
+        'flags' => [ '--standard=PSR1' ],
+        'display-flags' => '--standard=PSR1',
+        'conflicts' => [
+            'codesnif-std-psr2',
+            'codesnif-std-zend',
+            'codesnif-std-pear',
+            'codesnif-std-phpcs',
+            'codesnif-std-squiz',
+            'codesnif-std-mysource',
+        ],
+    ],
+    'codesnif-std-zend' => [
+        'display-name' => 'Zend',
+        'flags' => [ '--standard=Zend' ],
+        'display-flags' => '--standard=Zend',
+        'conflicts' => [
+            'codesnif-std-psr2',
+            'codesnif-std-psr1',
+            'codesnif-std-pear',
+            'codesnif-std-phpcs',
+            'codesnif-std-squiz',
+            'codesnif-std-mysource',
+        ],
+    ],
+    'codesnif-std-pear' => [
+        'display-name' => 'PEAR',
+        'flags' => [ '--standard=PEAR' ],
+        'display-flags' => '--standard=PEAR',
+        'conflicts' => [
+            'codesnif-std-psr2',
+            'codesnif-std-psr1',
+            'codesnif-std-zend',
+            'codesnif-std-phpcs',
+            'codesnif-std-squiz',
+            'codesnif-std-mysource',
+        ],
+    ],
+    'codesnif-std-phpcs' => [
+        'display-name' => 'PHPCS',
+        'flags' => [ '--standard=PHPCS' ],
+        'display-flags' => '--standard=PHPCS',
+        'conflicts' => [
+            'codesnif-std-psr2',
+            'codesnif-std-psr1',
+            'codesnif-std-zend',
+            'codesnif-std-pear',
+            'codesnif-std-squiz',
+            'codesnif-std-mysource',
+        ],
+    ],
+    'codesnif-std-squiz' => [
+        'display-name' => 'Squiz',
+        'flags' => [ '--standard=Squiz' ],
+        'display-flags' => '--standard=Squiz',
+        'conflicts' => [
+            'codesnif-std-psr2',
+            'codesnif-std-psr1',
+            'codesnif-std-zend',
+            'codesnif-std-pear',
+            'codesnif-std-phpcs',
+            'codesnif-std-mysource',
+        ],
+    ],
+    'codesnif-std-mysource' => [
+        'display-name' => 'MySource',
+        'flags' => [ '--standard=MySource' ],
+        'display-flags' => '--standard=MySource',
+        'conflicts' => [
+            'codesnif-std-psr2',
+            'codesnif-std-psr1',
+            'codesnif-std-zend',
+            'codesnif-std-pear',
+            'codesnif-std-phpcs',
+            'codesnif-std-squiz',
+        ],
+    ],
+];
+
+$compilers = array_filter(
+    array_merge(
+        makePhpReleases(),
+        makePhpSnapshots(),
+        //makeHhvm(),
+        makeCodeSniffer()
+    ),
+    function ($value) {
+        return !empty($value);
+    }
+);
+
+echo json_encode(
+    [
+        'switches' => $switches,
+        'compilers' => array_values($compilers),
+    ],
+    JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
+) . "\n";
+
+function makePhpReleases()
+{
+    $versions = array_filter(
+        getPhpVersionList(),
+        function ($version) {
+            return preg_match('/^[\d.]+$/', $version);
+        }
+    );
+    return array_map(
+        function ($version) {
+            $versionMajMin = preg_replace('/^(\d+\.\d+).+$/', "$1", $version);
+            return [
+                'compile-command' => '/bin/true',
+                'name' => "php-{$version}",
+                'language' => 'PHP ' . $versionMajMin,
+                'output-file' => 'prog.php',
+                'displayable' => true,
+                'version-command' => [
+                    '/bin/sh',
+                    '-c',
+                    "/opt/php/php-{$version}/bin/php -v head -1 | cut -d' ' -f2",
+                ],
+                'run-command' => [
+                    "/opt/php/php-{$version}/bin/php",
+                    "-d date.timezone=UTC",
+                    'prog.php',
+                ],
+                'display-compile-command' => 'php prog.php',
+                'display-name' => 'PHP',
+                'runtime-option-raw' => false,
+                'switches' => [
+                ],
+            ];
+        },
+        $versions
+    );
+}
+
+function makePhpSnapshots()
+{
+    $versions = array_filter(
+        getPhpVersionList(),
+        function ($version) {
+            return $version === 'master' || strpos($version, 'snapshot') !== false;
+        }
+    );
+    return array_map(
+        function ($version) {
+            $exePath = ($version === 'master')
+                ? '/opt/php/php-head/bin/php'
+                : sprintf(
+                    '/opt/php/php-%s-head/bin/php',
+                    preg_replace('/snapshot$/', '', $version)
+                );
+            if (!file_exists($exePath)) {
+                return null;
+            }
+            $realVersion = exec(
+                '/usr/bin/env ' .
+                escapeshellarg($exePath) . ' ' .
+                '-r ' . escapeshellarg(
+                    "echo PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION . '.' . PHP_RELEASE_VERSION;"
+                )
+            );
+            $versionMajMin = preg_replace('/^(\d+\.\d+).+$/', "$1", $realVersion);
+            return [
+                'compile-command' => '/bin/true',
+                'name' => "php-{$version}",
+                'language' => 'PHP HEADs',
+                'output-file' => 'prog.php',
+                'displayable' => true,
+                'version-command' => [
+                    '/bin/sh',
+                    '-c',
+                    "{$exePath} -v head -1 | cut -d' ' -f2",
+                ],
+                'run-command' => [
+                    "{$exePath}",
+                    "-d date.timezone=UTC",
+                    'prog.php',
+                ],
+                'display-compile-command' => 'php prog.php',
+                'display-name' => 'PHP HEAD',
+                'runtime-option-raw' => false,
+                'switches' => [
+                ],
+            ];
+        },
+        $versions
+    );
+}
+
+function makeHhvm()
+{
+    return [];
+}
+
+function makeCodeSniffer()
+{
+    $stdList = [
+        'codesnif-std-psr2',
+        'codesnif-std-psr1',
+        'codesnif-std-zend',
+        'codesnif-std-pear',
+        'codesnif-std-phpcs',
+        'codesnif-std-squiz',
+        'codesnif-std-mysource',
+    ];
+    $phpcs = [
+        'compile-command' => [
+            '/opt/fetus/code-sniffer/vendor/bin/phpcs',
+            '--no-colors',
+            '--encoding=UTF-8',
+            'prog.php',
+        ],
+        'name' => "phpcs",
+        'language' => 'Utility',
+        'output-file' => 'prog.php',
+        'displayable' => true,
+        'version-command' => [
+            '/bin/sh',
+            '-c',
+            "/opt/fetus/code-sniffer/vendor/bin/phpcs --version | head -1 | cut -d' ' -f3",
+        ],
+        'run-command' => '/bin/true',
+        'display-compile-command' => 'phpcs --encoding=UTF-8 prog.php',
+        'display-name' => 'phpcs',
+        'runtime-option-raw' => false,
+        'switches' => $stdList,
+    ];
+    $phpcbf = [
+        'compile-command' => [
+            '/opt/fetus/code-sniffer/phpcbf-wrapper',
+            'prog.php',
+        ],
+        'name' => "phpcbf",
+        'language' => 'Utility',
+        'output-file' => 'prog.php',
+        'displayable' => true,
+        'version-command' => [
+            '/bin/sh',
+            '-c',
+            "/opt/fetus/code-sniffer/vendor/bin/phpcbf --version | head -1 | cut -d' ' -f3",
+        ],
+        'run-command' => [
+            '/bin/cat',
+            'prog.php',
+        ],
+        'display-compile-command' => 'phpcbf --encoding=UTF-8 prog.php',
+        'display-name' => 'phpcbf',
+        'runtime-option-raw' => false,
+        'switches' => $stdList,
+    ];
+    return [
+        $phpcs,
+        $phpcbf,
+    ];
+}
+
+// php-build で作成可能な PHP バージョンの一覧を取得
+function getPhpVersionList()
+{
+    $cmdline = sprintf(
+        '/usr/bin/env %s --definitions | %s -r',
+        escapeshellarg('php-build'),
+        escapeshellarg(__DIR__ . '/versionsort')
+    );
+    exec($cmdline, $lines, $status);
+    if ($status !== 0) {
+        fwrite(STDERR, "Could not get version list from php-build\n");
+        exit(1);
+    }
+    return array_map(
+        function ($a) {
+            return trim($a);
+        },
+        $lines
+    );
+}
