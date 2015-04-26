@@ -1,5 +1,7 @@
 #!/usr/bin/php
 <?php
+define('REVERSE', in_array('-r', $argv) ? -1 : 1);
+
 $list = [];
 while (!feof(STDIN)) {
     $line = trim(fgets(STDIN));
@@ -12,10 +14,10 @@ usort(
     $list,
     function ($lhs, $rhs) {
         if ($lhs === 'master') {
-            return 1;
+            return REVERSE * 1;
         }
         if ($rhs === 'master') {
-            return -1;
+            return REVERSE * -1;
         }
         if (strpos($lhs, 'snapshot') !== false) {
             $lhs = str_replace('snapshot', '.9999', $lhs);
@@ -23,7 +25,7 @@ usort(
         if (strpos($rhs, 'snapshot') !== false) {
             $rhs = str_replace('snapshot', '.9999', $rhs);
         }
-        return version_compare($lhs, $rhs);
+        return REVERSE * version_compare($lhs, $rhs);
     }
 );
 
