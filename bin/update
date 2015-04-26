@@ -1,198 +1,94 @@
 #!/usr/bin/php
 <?php
-$skipBuild = !!in_array('--skip', $argv);
-$targets = [
-    'php-5.2' => [
-        'name' => 'PHP 5.2',
-        'version' => getRelease('5.2'),
-        'srcPatch' => ['php_dom.patch'],
-    ],
-    'php-5.3' => [
-        'name' => 'PHP 5.3',
-        'version' => getRelease('5.3'),
-        'fixStdCpp' => true,
-        'srcPatch' => ['php_dom.patch'],
-    ],
-    'php-5.4' => [
-        'name' => 'PHP 5.4',
-        'version' => getRelease('5.4')
-    ],
-    'php-5.5' => [
-        'name' => 'PHP 5.5',
-        'version' => getRelease('5.5')
-    ],
-    'php-5.6' => [
-        'name' => 'PHP 5.6',
-        'version' => getRelease('5.6')
-    ],
-    #'php-5.3.3' => [
-    #    'name' => 'PHP 5.3.3',
-    #    'version' => '5.3.3',
-    #    'fixStdCpp' => true,
-    #    'srcPatch' => ['php_dom.patch'],
-    #],
-    'php-5.5-head' => [
-        'name' => 'PHP 5.5 HEAD',
-        'version' => '5.5snapshot',
-    ],
-    'php-5.6-head' => [
-        'name' => 'PHP 5.6 HEAD',
-        'version' => '5.6snapshot',
-    ],
-    'php-head' => [
-        'name' => 'PHP HEAD',
-        'version' => 'master',
-    ],
-    'php-5.4.16' => [
-        'name' => 'PHP 5.4.16',
-        'version' => '5.4.16',
-        'builtin' => '/usr/bin/php',
-    ],
+function getPatches($version)
+{
+    $patches = [];
+    if (version_compare($version, '5.4.7', '<')) {
+        $patches[] = 'php_dom.patch';
+    }
+    return $patches;
+}
+
+// 一部のバージョンのビルドスクリプトが C++ なのに libc++ をリンクしない問題があるので
+// 該当するバージョンならリンクをいじる
+function fixLinkCPlusPlus($version)
+{
+    return version_compare($version, '5.3.0', '>=') &&
+           version_compare($version, '5.4.0', '<');
+}
+
+// php-build で作成可能な PHP バージョンの一覧を取得
+function getPhpVersionList()
+{
+    $cmdline = sprintf(
+        '/usr/bin/env %s --definitions | %s',
+        escapeshellarg('php-build'),
+        escapeshellarg(__DIR__ . '/versionsort')
+    );
+    exec($cmdline, $lines, $status);
+    if ($status !== 0) {
+        fwrite(STDERR, "Could not get version list from php-build\n");
+        exit(1);
+    }
+    return array_map(
+        function ($a) {
+            return trim($a);
+        },
+        $lines
+    );
+}
+
+$skipVersions = [
+    '5.4snapshot',
 ];
 
-$successful = true;
-$json = [
-    'switches' => [
-        'dummy' => [
-            'display-name' => 'dummy',
-            'flags' => [],
-        ],
-    ],
-    'compilers' => [
-    ],
-];
-foreach ($targets as $outdirname => $info) {
-    if (isset($info['builtin'])) {
-        $outphp = $info['builtin'];
+foreach (getPhpVersionList() as $version) {
+    if (in_array($version, $skipVersions)) {
+        echo "Skip: {$version}\n";
+        continue;
+    }
+    if (preg_match('/^[\d.]+$/', $version)) { // release
+        $outdir = '/opt/php/php-' . $version;
+        $force = false;
+    } elseif (strpos($version, 'snapshot') !== false) {
+        $outdir = sprintf(
+            '/opt/php/php-%s-head',
+            preg_replace('/snapshot$/', '', $version)
+        );
+        $force = true;
+    } elseif ($version === 'master') {
+        $outdir = '/opt/php/php-head';
+        $force = true;
     } else {
-        $outdir = '/opt/php/' . $outdirname;
-        $outphp = $outdir . '/bin/php';
-        if (!file_exists($outphp) || !isInstalled($outphp, $info['version'])) {
-            if ($skipBuild) {
-                echo "Skip building " . $info['version'] . "\n";
-            } else {
-                echo 'Install ' . $info['version'] . ' to ' . $outdir . "\n";
-                if (isset($info['srcPatch'])) {
-                    foreach ($info['srcPatch'] as $patch) {
-                        addSourcePatchSetting($info['version'], $patch);
-                    }
-                }
-                if ((isset($info['fixStdCpp']) && $info['fixStdCpp'])) {
-                    $cmdline = sprintf(
-                        '/usr/bin/env EXTRA_LIBS=-lstdc++ php-build %s %s',
-                        escapeshellarg($info['version']),
-                        escapeshellarg($outdir)
-                    );
-                } else {
-                    $cmdline = sprintf(
-                        '/usr/bin/env php-build %s %s',
-                        escapeshellarg($info['version']),
-                        escapeshellarg($outdir)
-                    );
-                }
-                passthru($cmdline, $status);
-                if ($status !== 0) {
-                    $successful = false;
-                }
-	    }
-        } else {
-            echo $info['version'] . ": already exists.\n";
+        continue;
+    }
+
+    if (!$force && file_exists($outdir . '/bin/php')) {
+        echo "Already exists: $version\n";
+        continue;
+    }
+
+    echo "**** BUILDING PHP {$version} ****\n";
+
+    if ($patches = getPatches($version)) {
+        foreach (array_reverse($patches) as $patch) {
+            addSourcePatchSetting($version, $patch);
         }
     }
-    $json['compilers'][] = [
-        'compile-command' => '/bin/true',
-        'name' => $info['name'],
-        'language' => 'PHP',
-        'output-file' => 'prog.php',
-        'displayable' => true,
-        'version-command' => [
-            '/bin/sh',
-            '-c',
-            $outphp . " -v | head -1 | cut -d' ' -f2",
-        ],
-        'run-command' => [
-            $outphp,
-            'prog.php',
-        ],
-        'display-compile-command' => 'php prog.php',
-        'display-name' => preg_replace('/\s*[\d\.]+(?:\s+HEAD)?$/', '', $info['name']),
-        'runtime-option-raw' => true,
-        'x-order-name' => 'PHP ' . $info['version'],
-    ];
-}
-/*
-$json['compilers'][] = [
-    'compile-command' => '/bin/true',
-    'name' => 'HHVM-PHP',
-    'language' => 'PHP',
-    'output-file' => 'prog.php',
-    'displayable' => true,
-    'version-command' => [
-        '/bin/sh',
-        '-c',
-        "/usr/local/bin/hhvm --version | head -1 | cut -d' ' -f3"
-    ],
-    'run-command' => [
-        '/usr/local/bin/hhvm',
-        'prog.php',
-    ],
-    'display-compile-command' => 'hhvm prog.php',
-    'display-name' => 'HHVM(PHP)',
-    'runtime-option-raw' => true,
-    'x-order-name' => 'HHVM PHP',
-];
-$json['compilers'][] = [
-    'compile-command' => '/bin/true',
-    'name' => 'HHVM-Hack',
-    'language' => 'Hack',
-    'output-file' => 'prog.hh',
-    'displayable' => true,
-    'version-command' => [
-        '/bin/sh',
-        '-c',
-        "/usr/local/bin/hhvm --version | head -1 | cut -d' ' -f3"
-    ],
-    'run-command' => [
-        '/usr/local/bin/hhvm',
-        'prog.hh',
-    ],
-    'display-compile-command' => 'hhvm prog.hh',
-    'display-name' => 'HHVM(Hack)',
-    'runtime-option-raw' => true,
-    'x-order-name' => 'HHVM Hack',
-];
-*/
-usort(
-    $json['compilers'],
-    function ($lhs, $rhs) {
-        return -1 * strnatcasecmp($lhs['x-order-name'], $rhs['x-order-name']);
+    if (fixLinkCPlusPlus($version)) {
+        $cmdline = sprintf(
+            '/usr/bin/env CFLAGS="-O3 -march=native -mtune=native" CXXFLAGS="-O3 -march=native -mtune=native" EXTRA_LIBS=-lstdc++ php-build %s %s',
+            escapeshellarg($version),
+            escapeshellarg($outdir)
+        );
+    } else {
+        $cmdline = sprintf(
+            '/usr/bin/env CFLAGS="-O3 -march=native -mtune=native" CXXFLAGS="-O3 -march=native -mtune=native" php-build %s %s',
+            escapeshellarg($version),
+            escapeshellarg($outdir)
+        );
     }
-);
-
-file_put_contents(
-    '/opt/wandbox/etc/cattleshed.conf.d/compilers.default',
-    json_encode($json, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n"
-);
-
-function getRelease($major)
-{
-    $versionsort = escapeshellarg(__DIR__ . '/versionsort');
-    $cmdline = "/usr/bin/env php-build --definitions | grep '^{$major}\.' | {$versionsort} | tail -n 1";
-    $ret = exec($cmdline, $lines, $status);
-    if ($status !== 0) {
-        die;
-    }
-    return trim($ret);
-}
-
-function isInstalled($phpPath, $version)
-{
-    $cmdline = '/usr/bin/env ' . escapeshellarg($phpPath) . ' --version | head -n 1 | awk ' . escapeshellarg('{print $2}');
-    $ret = exec($cmdline, $lines, $status);
-    if ($status !== 0) {
-        die;
-    }
-    return trim($ret) === (string)$version;
+    passthru($cmdline, $status);
 }
 
 function addSourcePatchSetting($version, $patch)
