@@ -92,13 +92,113 @@ $switches = [
             'codesnif-std-squiz',
         ],
     ],
+    'phpmd-cleancode' => [
+        'display-name' => 'cleancode',
+        'flags' => [ '--cleancode' ],
+        'display-flags' => 'cleancode',
+    ],
+    'phpmd-codesize' => [
+        'display-name' => 'codesize',
+        'flags' => [ '--codesize' ],
+        'display-flags' => 'codesize',
+    ],
+    'phpmd-controversial' => [
+        'display-name' => 'controversial',
+        'flags' => [ '--controversial' ],
+        'display-flags' => 'controversial',
+    ],
+    'phpmd-design' => [
+        'display-name' => 'design',
+        'flags' => [ '--design' ],
+        'display-flags' => 'design',
+    ],
+    'phpmd-naming' => [
+        'display-name' => 'naming',
+        'flags' => [ '--naming' ],
+        'display-flags' => 'naming',
+    ],
+    'phpmd-unusedcode' => [
+        'display-name' => 'unusedcode',
+        'flags' => [ '--unusedcode' ],
+        'display-flags' => 'unusedcode',
+    ],
+    'phpcpd-fuzzy' => [
+        'display-name' => 'fuzzy',
+        'flags' => [ '--fuzzy' ],
+        'display-flags' => '--fuzzy',
+    ],
+    'phpcpd-min-lines-2' => [
+        'display-name' => 'min-lines = 2',
+        'flags' => [ '--min-lines=2' ],
+        'display-flags' => '--min-lines=2',
+        'conflicts' => [ 'phpcpd-min-lines-2', 'phpcpd-min-lines-4', 'phpcpd-min-lines-7', 'phpcpd-min-lines-10', 'phpcpd-min-lines-15' ],
+    ],
+    'phpcpd-min-lines-4' => [
+        'display-name' => 'min-lines = 4 (default)',
+        'flags' => [ '--min-lines=4' ],
+        'display-flags' => '--min-lines=4',
+        'conflicts' => [ 'phpcpd-min-lines-2', 'phpcpd-min-lines-4', 'phpcpd-min-lines-7', 'phpcpd-min-lines-10', 'phpcpd-min-lines-15' ],
+    ],
+    'phpcpd-min-lines-7' => [
+        'display-name' => 'min-lines = 7',
+        'flags' => [ '--min-lines=7' ],
+        'display-flags' => '--min-lines=7',
+        'conflicts' => [ 'phpcpd-min-lines-2', 'phpcpd-min-lines-4', 'phpcpd-min-lines-7', 'phpcpd-min-lines-10', 'phpcpd-min-lines-15' ],
+    ],
+    'phpcpd-min-lines-10' => [
+        'display-name' => 'min-lines = 10',
+        'flags' => [ '--min-lines=10' ],
+        'display-flags' => '--min-lines=10',
+        'conflicts' => [ 'phpcpd-min-lines-2', 'phpcpd-min-lines-4', 'phpcpd-min-lines-7', 'phpcpd-min-lines-10', 'phpcpd-min-lines-15' ],
+    ],
+    'phpcpd-min-lines-15' => [
+        'display-name' => 'min-lines = 15',
+        'flags' => [ '--min-lines=15' ],
+        'display-flags' => '--min-lines=15',
+    ],
+    'phpcpd-min-tokens-15' => [
+        'display-name' => 'min-tokens = 15',
+        'flags' => [ '--min-tokens=15' ],
+        'display-flags' => '--min-tokens=15',
+        'conflicts' => [ 'phpcpd-min-tokens-15', 'phpcpd-min-tokens-30', 'phpcpd-min-tokens-50', 'phpcpd-min-tokens-70', 'phpcpd-min-tokens-100', 'phpcpd-min-tokens-150' ],
+    ],
+    'phpcpd-min-tokens-30' => [
+        'display-name' => 'min-tokens = 30',
+        'flags' => [ '--min-tokens=30' ],
+        'display-flags' => '--min-tokens=30',
+        'conflicts' => [ 'phpcpd-min-tokens-15', 'phpcpd-min-tokens-30', 'phpcpd-min-tokens-50', 'phpcpd-min-tokens-70', 'phpcpd-min-tokens-100', 'phpcpd-min-tokens-150' ],
+    ],
+    'phpcpd-min-tokens-50' => [
+        'display-name' => 'min-tokens = 50',
+        'flags' => [ '--min-tokens=50' ],
+        'display-flags' => '--min-tokens=50',
+        'conflicts' => [ 'phpcpd-min-tokens-15', 'phpcpd-min-tokens-30', 'phpcpd-min-tokens-50', 'phpcpd-min-tokens-70', 'phpcpd-min-tokens-100', 'phpcpd-min-tokens-150' ],
+    ],
+    'phpcpd-min-tokens-70' => [
+        'display-name' => 'min-tokens = 70 (default)',
+        'flags' => [ '--min-tokens=70' ],
+        'display-flags' => '--min-tokens=70',
+        'conflicts' => [ 'phpcpd-min-tokens-15', 'phpcpd-min-tokens-30', 'phpcpd-min-tokens-50', 'phpcpd-min-tokens-70', 'phpcpd-min-tokens-100', 'phpcpd-min-tokens-150' ],
+    ],
+    'phpcpd-min-tokens-100' => [
+        'display-name' => 'min-tokens = 100',
+        'flags' => [ '--min-tokens=100' ],
+        'display-flags' => '--min-tokens=100',
+        'conflicts' => [ 'phpcpd-min-tokens-15', 'phpcpd-min-tokens-30', 'phpcpd-min-tokens-50', 'phpcpd-min-tokens-70', 'phpcpd-min-tokens-100', 'phpcpd-min-tokens-150' ],
+    ],
+    'phpcpd-min-tokens-150' => [
+        'display-name' => 'min-tokens = 150',
+        'flags' => [ '--min-tokens=150' ],
+        'display-flags' => '--min-tokens=150',
+        'conflicts' => [ 'phpcpd-min-tokens-15', 'phpcpd-min-tokens-30', 'phpcpd-min-tokens-50', 'phpcpd-min-tokens-70', 'phpcpd-min-tokens-100', 'phpcpd-min-tokens-150' ],
+    ],
 ];
 
 $compilers = array_filter(
     array_merge(
         makePhpReleases(),
         makePhpSnapshots(),
-        //makeHhvm(),
+        makeHhvm(),
         makeCodeSniffer()
     ),
     function ($value) {
@@ -126,7 +226,13 @@ function makePhpReleases()
         function ($version) {
             $versionMajMin = preg_replace('/^(\d+\.\d+).+$/', "$1", $version);
             return [
-                'compile-command' => '/bin/true',
+                'compile-command' => [
+                    '/bin/true',
+                ],
+                // 'compile-command' => [
+                //     '/opt/fetus/wandbox-preprocessor/preprocessor4php',
+                //     'prog.php',
+                // ],
                 'name' => "php-{$version}",
                 'language' => 'PHP ' . $versionMajMin,
                 'output-file' => 'prog.php',
@@ -178,9 +284,14 @@ function makePhpSnapshots()
                     "echo PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION . '.' . PHP_RELEASE_VERSION;"
                 )
             );
-            $versionMajMin = preg_replace('/^(\d+\.\d+).+$/', "$1", $realVersion);
             return [
-                'compile-command' => '/bin/true',
+                'compile-command' => [
+                    '/bin/true',
+                ],
+                // 'compile-command' => [
+                //     '/opt/fetus/wandbox-preprocessor/preprocessor4php',
+                //     'prog.php',
+                // ],
                 'name' => "php-{$version}",
                 'language' => 'PHP HEADs',
                 'output-file' => 'prog.php',
@@ -208,7 +319,47 @@ function makePhpSnapshots()
 
 function makeHhvm()
 {
-    return [];
+    $versions = [
+        'head',
+        '3.7-head',
+        '3.6-head',
+        '3.6.1',
+    ];
+    return array_map(
+        function ($version) {
+            return [
+                'name' => "hhvm-{$version}",
+                'language' => 'HHVM',
+                'output-file' => 'prog.php',
+                'displayable' => true,
+                'version-command' => [
+                    '/bin/sh',
+                    '-c',
+                    "/opt/hhvm/hhvm-{$version}/bin/hhvm --version | cut -d' ' -f3",
+                ],
+                //'compile-command' => [
+                //    '/opt/fetus/wandbox-preprocessor/preprocessor4php',
+                //    '--hack',
+                //    'prog.php',
+                //],
+                'compile-command' => [
+                    '/usr/bin/touch',
+                    '.hhconfig',
+                ],
+                'run-command' => [
+                    "/opt/hhvm/hhvm-{$version}/bin/hhvm",
+                    "-d date.timezone=Etc/UTC",
+                    'prog.php',
+                ],
+                'display-compile-command' => 'hhvm prog.php',
+                'display-name' => strpos($version, 'head') === false ? 'HHVM' : 'HHVM HEAD',
+                'runtime-option-raw' => false,
+                'switches' => [
+                ],
+            ];
+        },
+        $versions
+    );
 }
 
 function makeCodeSniffer()
@@ -267,9 +418,76 @@ function makeCodeSniffer()
         'runtime-option-raw' => false,
         'switches' => $stdList,
     ];
+    $phpmd = [
+        'compile-command' => [
+            '/opt/fetus/code-sniffer/phpmd-wrapper',
+            'prog.php',
+        ],
+        'name' => 'phpmd',
+        'language' => 'Utility',
+        'output-file' => 'prog.php',
+        'displayable' => true,
+        'version-command' => [
+            '/bin/sh',
+            '-c',
+            "/opt/fetus/code-sniffer/vendor/bin/phpmd --version | head -1 | cut -d' ' -f2",
+        ],
+        'run-command' => [ '/bin/true' ],
+        'runtime-option-raw' => false,
+        'display-compile-command' => 'phpmd prog.php text',
+        'display-name' => 'phpmd',
+        'switches' => [
+            'phpmd-cleancode',
+            'phpmd-codesize',
+            'phpmd-controversial',
+            'phpmd-design',
+            'phpmd-naming',
+            'phpmd-unusedcode',
+        ],
+        'initial-checked' => [
+            'phpmd-cleancode',
+            'phpmd-codesize',
+            //'phpmd-controversial',
+            'phpmd-design',
+            'phpmd-naming',
+            'phpmd-unusedcode',
+        ]
+    ];
+    $phpcpd = [
+        'compile-command' => [
+            '/opt/fetus/code-sniffer/vendor/bin/phpcpd',
+            '--no-ansi',
+            '--no-interaction',
+            'prog.php',
+        ],
+        'name' => 'phpcpd',
+        'language' => 'Utility',
+        'output-file' => 'prog.php',
+        'displayable' => true,
+        'version-command' => [
+            '/bin/sh',
+            '-c',
+            "/opt/fetus/code-sniffer/vendor/bin/phpcpd --version | head -1 | cut -d' ' -f2",
+        ],
+        'run-command' => [ '/bin/true' ],
+        'runtime-option-raw' => false,
+        'display-compile-command' => 'phpcpd --no-interaction prog.php',
+        'display-name' => 'phpcpd',
+        'switches' => [
+            'phpcpd-fuzzy',
+            'phpcpd-min-lines-2', 'phpcpd-min-lines-4', 'phpcpd-min-lines-7', 'phpcpd-min-lines-10', 'phpcpd-min-lines-15',
+            'phpcpd-min-tokens-15', 'phpcpd-min-tokens-30', 'phpcpd-min-tokens-50', 'phpcpd-min-tokens-70', 'phpcpd-min-tokens-100', 'phpcpd-min-tokens-150',
+        ],
+        'initial-checked' => [
+            'phpcpd-min-lines-4',
+            'phpcpd-min-tokens-70',
+        ],
+    ];
     return [
         $phpcs,
         $phpcbf,
+        $phpmd,
+        $phpcpd,
     ];
 }
 
