@@ -199,6 +199,7 @@ $compilers = array_filter(
         makePhpReleases(),
         makePhpSnapshots(),
         makeHhvm(),
+        makeHippy(),
         makeCodeSniffer()
     ),
     function ($value) {
@@ -323,7 +324,11 @@ function makeHhvm()
         'head',
         '3.7-head',
         '3.6-head',
+        '3.3-head',
+        '3.7.0',
+        '3.6.2',
         '3.6.1',
+        '3.3.5',
     ];
     return array_map(
         function ($version) {
@@ -360,6 +365,34 @@ function makeHhvm()
         },
         $versions
     );
+}
+
+function makeHippy()
+{
+    return [
+        [
+            'name' => "hippy-c8a1d94",
+            'language' => 'HippyVM',
+            'output-file' => 'prog.php',
+            'displayable' => true,
+            'version-command' => [
+                '/bin/echo',
+                'c8a1d94@20150317',
+            ],
+            'compile-command' => [
+                '/bin/true',
+            ],
+            'run-command' => [
+                '/opt/hippy/hippy-20150317-c8a1d94/hippy-c',
+                'prog.php',
+            ],
+            'display-compile-command' => 'hippy-c prog.php',
+            'display-name' => 'HippyVM',
+            'runtime-option-raw' => false,
+            'switches' => [
+            ],
+        ],
+    ];
 }
 
 function makeCodeSniffer()
@@ -483,11 +516,33 @@ function makeCodeSniffer()
             'phpcpd-min-tokens-70',
         ],
     ];
+    $json_format = [
+        'compile-command' => [
+            '/bin/true',
+        ],
+        'name' => 'json_format',
+        'language' => 'Utility',
+        'output-file' => 'input.json',
+        'displayable' => true,
+        'version-command' => [
+            '/bin/echo',
+            '?',
+        ],
+        'run-command' => [
+            '/opt/fetus/code-sniffer/json_format',
+            'input.json',
+        ],
+        'runtime-option-raw' => false,
+        'display-compile-command' => 'json_format input.json',
+        'display-name' => 'json_format',
+        'switches' => [],
+    ];
     return [
         $phpcs,
         $phpcbf,
         $phpmd,
         $phpcpd,
+        $json_format,
     ];
 }
 
