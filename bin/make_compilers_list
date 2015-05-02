@@ -199,7 +199,9 @@ $compilers = array_filter(
         makePhpReleases(),
         makePhpSnapshots(),
         makeHhvm(),
+        makeQuercus(),
         makeHippy(),
+        makePyhp(),
         makeCodeSniffer()
     ),
     function ($value) {
@@ -367,6 +369,37 @@ function makeHhvm()
     );
 }
 
+function makeQuercus()
+{
+    return [
+        [
+            'name' => 'quercus-4.0.39',
+            'language' => 'Quercus',
+            'jail-name' => 'jvm',
+            'output-file' => 'prog.php',
+            'displayable' => true,
+            'version-command' => [
+                '/bin/echo',
+                '4.0.39',
+            ],
+            'compile-command' => [
+                '/bin/true',
+            ],
+            'run-command' => [
+                '/usr/bin/java',
+                '-jar',
+                '/opt/quercus/quercus-4.0.39/WEB-INF/lib/quercus.jar',
+                'prog.php',
+            ],
+            'display-compile-command' => 'java -jar quercus.jar prog.php',
+            'display-name' => 'Quercus',
+            'runtime-option-raw' => false,
+            'switches' => [
+            ],
+        ]
+    ];
+}
+
 function makeHippy()
 {
     return [
@@ -388,6 +421,34 @@ function makeHippy()
             ],
             'display-compile-command' => 'hippy-c prog.php',
             'display-name' => 'HippyVM',
+            'runtime-option-raw' => false,
+            'switches' => [
+            ],
+        ],
+    ];
+}
+
+function makePyhp()
+{
+    return [
+        [
+            'name' => "pyhp-head",
+            'language' => 'PyHP',
+            'output-file' => 'prog.php',
+            'displayable' => true,
+            'version-command' => [
+                '/bin/echo',
+                'ff1e491',
+            ],
+            'compile-command' => [
+                '/bin/true',
+            ],
+            'run-command' => [
+                '/opt/pyhp/pyhp-head/pyhp-c',
+                'prog.php',
+            ],
+            'display-compile-command' => 'pyhp-c prog.php',
+            'display-name' => 'PyHP',
             'runtime-option-raw' => false,
             'switches' => [
             ],
